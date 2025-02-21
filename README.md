@@ -78,7 +78,7 @@ browser.
 objects; so far, we've covered `path` and `element`. Another
 option, `children`, is how we can tell a route that it has _nested routes_.
 
-W'll start by setting up the `Layout` component. This component is already created 
+We'll start by setting up the `Layout` component. This component is already created 
 in the pages/ folder, so all we need to do is include our `NavBar` component directly 
 within our `Layout`, rather than dropping it into every page-level component:
 
