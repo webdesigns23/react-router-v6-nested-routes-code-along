@@ -13,8 +13,7 @@ application we made in the previous code-along. However, we want to make some
 updates!
 
 First of all, we don't want to have to include our `NavBar` component in every
-page level component — that wasn't very DRY! We also included the same
-`ErrorPage` on every one of our components — we'll fix that too.
+page level component — that wasn't very DRY!
 
 Second of all, we don't want to navigate to a brand new web page to view a
 specific user. Instead, we want that user to display on the same page as the
@@ -42,16 +41,7 @@ components, each of which was rendering on its own route.
 While this parallel approach definitely works, and might be the right decision
 depending on the app you're building, it has some drawbacks. As mentioned above,
 we had some code that wasn't very DRY — we used the `NavBar` component in every
-one of our page views, and gave each of our routes the same exact
-`errorElement`.
-
-Moreover, the only way we could have declared global state for our application
-would have been through creating our own `contextProvider` with [the
-`useContext` hook][useContext]. While this is, once again, a perfectly
-reasonable approach, it can be nice to have a parent component that can
-instantiate and pass down global application state when your app first loads.
-
-[useContext]: (https://react.dev/learn/passing-data-deeply-with-context)
+one of our page views.
 
 >**Note**: We could have also used a more advanced feature of `react-router`
 >called `loaders`, which allow you to request data for a page as it loads. This
@@ -64,9 +54,9 @@ will often depend on what you're trying to build. As a beginner, it's best to
 learn a variety of design patterns, so you can intelligently apply the right one
 to your own unique situation!
 
-Okay, enough theorizing — let's get to actually creating this parent App
+Okay, enough theorizing — let's get to actually creating this parent Layout
 component. We will pick up where we left off with the last code-along, but note
-that we've already added the `App.js` file for you.
+that we've already added the `Layout.jsx` file for you.
 
 If you haven't already, go ahead and fork and clone the repo for this
 code-along. Then run `npm install` to install the dependencies, `npm run server`
@@ -76,92 +66,74 @@ browser.
 ## Rendering Nested Routes as "children"
 
 `react-router-dom` gives us a variety of options we can include in our route
-objects; so far, we've covered `path`, `element`, and `errorElement`. Another
+objects; so far, we've covered `path` and `element`. Another
 option, `children`, is how we can tell a route that it has _nested routes_.
 
-Go ahead and update our `routes.js` file to include the following code. This
+Go ahead and update our routes in `App.jsx` to include the following code. This
 will render each of our page-level components as a nested route of our `/` path
 and our `App` component:
 
 ```jsx
-// routes.js
-import App from "./App";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Login from "./pages/Login";
-import UserProfile from "./pages/UserProfile";
-import ErrorPage from "./pages/ErrorPage";
+// App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Layout from "./pages/Layout"
+import Home from "./pages/Home"
+import About from "./pages/About"
+import Login from "./pages/Login"
+import UserProfile from "./pages/UserProfile"
+import ErrorPage from "./pages/ErrorPage"
 
-const routes = [
-    {
-        path: "/",
-        element: <App />,
-        errorElement: <ErrorPage />,
-        children: [
-             {
-                path: "/",
-                element: <Home />
-            }, 
-            {
-                path: "/about",
-                element: <About />
-            },
-            {
-                path: "/login",
-                element: <Login />
-            },
-            {
-                path: "/profile/:id",
-                element: <UserProfile />
-            }
-        ]
-    }
-];
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+          <Route path="/" element={Layout}>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile/:id" element={<UserProfile />} />
+            <Route path="*" element={<ErrorPage />}/>
+          </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
-export default routes;
+export default App
 ```
 
-Let's walk through all of the changes we've made in the `routes.js` file.
-
-First, we imported the `App` component and added it as the parent component in
+First, we imported the `Layout` component and added it as the parent component in
 our routes array.
 
 Second, by entering our different route objects as an array associated with our
-`App` route's `children` key, we've set them up to render _inside_ of our `App`
+`Layout` route's `children` key, we've set them up to render _inside_ of our `Layout`
 component. That means that if we navigate to any of these _nested routes_ — such
-as `/login`, for example — our `App` component will render with our `Login`
+as `/login`, for example — our `Layout` component will render with our `Login`
 component as a child component.
 
 Note that it's okay for our `Home` component to have the same path as our parent
-`App` component. All child route paths must _start with_ their parent's route
+`Layout` component. All child route paths must _start with_ their parent's route
 path, and one of them (but only one) can _exactly match_ its parent's route
 path.
 
-Third, now that all of our routes are children of `App`, we can just include our
-`errorElement` on `App` — any errors that occur in one of our nested routes will
-"bubble up" to the parent route, which will render our `ErrorPage`. Much DRYer!
-
-Alternatively, you can render unique `errorElement`s for each route, if you want
-to create different error handling pages for different routes.
-
-There's one more simplification we can make, this time to the `App.js` file.
-Since `App` now renders no matter what URL we visit, we can just include our
-`NavBar` component directly within our `App`, rather than dropping it into every
+There's one more simplification we can make, this time to the `Layout.jsx` file.
+Since `Layout` now renders no matter what URL we visit, we can just include our
+`NavBar` component directly within our `Layout`, rather than dropping it into every
 page-level component:
 
 ```jsx
-// App.js
-import NavBar from "./components/NavBar";
+// Layout.jsx
+import NavBar from "./components/NavBar"
 
-function App(){
+function Layout(){
     return(
         <>
             <header>
                 <NavBar />
             </header>
         </>
-    );
-};
+    )
+}
 ```
 
 Much easier! And, if we create a new page for our website, we don't have to
@@ -190,11 +162,11 @@ determine which component should be rendered based on the current route.
 Including it in a component is pretty straightforward:
 
 ```jsx
-// App.js
-import { Outlet } from "react-router-dom";
-import NavBar from "./components/NavBar";
+// Layout.jsx
+import { Outlet } from "react-router-dom"
+import NavBar from "./components/NavBar"
 
-function App(){
+function Layout(){
     return(
         <>
             <header>
@@ -202,8 +174,8 @@ function App(){
             </header>
             <Outlet />
         </>
-    );
-};
+    )
+}
 ```
 
 And boom! We have nested routing!
@@ -215,64 +187,59 @@ we want to view a specific user profile while still viewing the list of all our
 available users. We can implement this feature by making our `UserProfile`
 component a _nested route_ within our `Home` component.
 
-Let's update our `routes.js` file to make that change!
+Let's update our `App.jsx` file to make that change!
 
 ```jsx
-// routes.js
-// ...import statements
+// App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Layout from "./pages/Layout"
+import Home from "./pages/Home"
+import About from "./pages/About"
+import Login from "./pages/Login"
+import UserProfile from "./pages/UserProfile"
+import ErrorPage from "./pages/ErrorPage"
 
-const routes = [
-    {
-        path: "/",
-        element: <App />,
-        errorElement: <ErrorPage />,
-        children: [
-             {
-                path: "/",
-                element: <Home />,
-                children: [
-                    {
-                        path: "/profile/:id",
-                        element: <UserProfile />
-                    }
-                ]
-            }, 
-            {
-                path: "/about",
-                element: <About />
-            },
-            {
-                path: "/login",
-                element: <Login />
-            }
-        ]
-    }
-];
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+          <Route path="/" element={Layout}>
+            <Route path="/" element={<Home />}>
+                <Route path="/profile/:id" element={<UserProfile />} />
+            </Route>
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<ErrorPage />}/>
+          </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
-// ...export statement
+export default App
 ```
 
 We'll need to also make sure we update our `Home` component to use the `Outlet`
 component from `react-router-dom`.
 
 ```jsx
-// Home.js
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
-import UserCard from "../components/UserCard";
+// Home.jsx
+import { useState, useEffect } from "react"
+import { Outlet } from "react-router-dom"
+import UserCard from "../components/UserCard"
 
 function Home(){
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState([])
 
     useEffect(() =>{
         fetch("http://localhost:4000/users")
         .then(r => r.json())
         .then(data => setUsers(data))
-        .catch(error => console.error(error));
+        .catch(error => console.error(error))
     }, []);
 
     const userList = users.map(user =>{
-        return <UserCard key={user.id} user={user}/>;
+        return <UserCard key={user.id} user={user}/>
     });
 
     return (
@@ -281,10 +248,10 @@ function Home(){
             <Outlet />
             {userList}
         </main>
-    );
-};
+    )
+}
 
-export default Home;
+export default Home
 ```
 
 Try navigating to one of our user profile routes. You should see that profile
@@ -311,7 +278,7 @@ in whatever child component needs the data using the `useOutletContext` hook.
 ```
 
 ```jsx
-const data = useOutletContext();
+const data = useOutletContext()
 ```
 
 If you want to pass multiple pieces of data, you can pass either an array or an
@@ -323,28 +290,28 @@ object to the context prop, then destructure it when you invoke the
 ```
 
 ```jsx
-const {firstProp, secondProp} = useOutletContext();
+const {firstProp, secondProp} = useOutletContext()
 ```
 
 Let's change our code such that our `users` data is being fetched within our
-`App` component. We'll then want to pass `users` down via our `Outlet`
+`Layout` component. We'll then want to pass `users` down via our `Outlet`
 component's `context` prop, so that we can access it within our nested routes.
 
 ```jsx
-// App.js
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
-import NavBar from "./components/NavBar";
+// Layout.jsx
+import { useState, useEffect } from "react"
+import { Outlet } from "react-router-dom"
+import NavBar from "./components/NavBar"
 
-function App(){
-    const [users, setUsers] = useState([]);
+function Layout(){
+    const [users, setUsers] = useState([])
 
     useEffect(() =>{
         fetch("http://localhost:4000/users")
         .then(r => r.json())
         .then(data => setUsers(data))
-        .catch(error => console.error(error));
-    }, []);
+        .catch(error => console.error(error))
+    }, [])
 
     return(
         <>
@@ -353,21 +320,21 @@ function App(){
             </header>
             <Outlet context={users}/>
         </>
-    );
-};
+    )
+}
 ```
 
 Now, within our `Home` component we can use the `useOutletContext` hook to
 access that piece of data:
 
 ```jsx
-// Home.js
-import { Outlet, useOutletContext } from "react-router-dom";
-import UserCard from "../components/UserCard";
+// Home.jsx
+import { Outlet, useOutletContext } from "react-router-dom"
+import UserCard from "../components/UserCard"
 
 function Home(){
-    const users = useOutletContext();
-    const userList = users.map(user => <UserCard key={user.id} user={user}/>);
+    const users = useOutletContext()
+    const userList = users.map(user => <UserCard key={user.id} user={user}/>)
 
   return (
       <main>
@@ -375,10 +342,10 @@ function Home(){
         <Outlet />
         {userList}
       </main>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
 ```
 
 We should see our list of users rendering just as it was before!
@@ -393,12 +360,12 @@ user data in this component, but for the sake of demonstration we're going to
 update this component to include the following code:
 
 ```jsx
-// UserCard.js
-import { Link, useOutletContext } from "react-router-dom";
+// UserCard.jsx
+import { Link, useOutletContext } from "react-router-dom"
 
 function UserCard({user}) {
-    const users = useOutletContext();
-    console.log(users);
+    const users = useOutletContext()
+    console.log(users)
 
   return (
     <article>
@@ -407,17 +374,17 @@ function UserCard({user}) {
           <Link to={`/profile/${user.id}`}>View profile</Link>
         </p>
     </article>
-  );
-};
+  )
+}
 
-export default UserCard;
+export default UserCard
 ```
 
 We should be seeing our array of four users being logged to our browser console.
 
 Instead of passing props from `Home` to `UserCard`, we can just use the
 `useOutletContext` hook to directly access the data that was originally passed
-to our `Outlet` component in `App`. This is a very helpful feature if you ever
+to our `Outlet` component in `Layout`. This is a very helpful feature if you ever
 need to pass data to a deeply nested component, and is a great reason to use
 Context Providers in general with React's `useContext` hook.
 
@@ -426,48 +393,43 @@ routes.
 
 ### `useOutletContext` and Deeply Nested Routes
 
-If we look at our `routes` in our `routes.js` file, we'll see that we have a
+If we look at our routes in our `App.jsx` file, we'll see that we have a
 deeply nested route:
 
 ```jsx
-// routes.js
-// ...import statements
+// App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Layout from "./pages/Layout"
+import Home from "./pages/Home"
+import About from "./pages/About"
+import Login from "./pages/Login"
+import UserProfile from "./pages/UserProfile"
+import ErrorPage from "./pages/ErrorPage"
 
-const routes = [
-    {
-        path: "/",
-        element: <App />,
-        errorElement: <ErrorPage />,
-        children: [
-             {
-                path: "/",
-                element: <Home />,
-                children: [
-                    {
-                        path: "/profile/:id",
-                        element: <UserProfile />
-                    }
-                ]
-            }, 
-            {
-                path: "/about",
-                element: <About />
-            },
-            {
-                path: "/login",
-                element: <Login />
-            }
-        ]
-    }
-];
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+          <Route path="/" element={Layout}>
+            <Route path="/" element={<Home />}>
+                <Route path="/profile/:id" element={<UserProfile />} />
+            </Route>
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<ErrorPage />}/>
+          </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
-// ...export statement
+export default App
 ```
 
-Our `Home` route is nested within our `App` route, and our `UserProfile` route
+Our `Home` route is nested within our `Layout` route, and our `UserProfile` route
 is nested within our `Home` route.
 
-If we provide a piece of data to the `Outlet` component within our `App`, and we
+If we provide a piece of data to the `Outlet` component within our `Layout`, and we
 want to access it within our `UserProfile` component, we'll have to pass that
 data to the `Outlet` component within our `Home` component first.
 
@@ -476,50 +438,46 @@ for data. So, if we have one `Outlet` nested within another `Outlet`, we'll need
 to make sure we pass data to that inner `Outlet` as well:
 
 ```jsx
-// Home.js
-import { Outlet, useOutletContext } from "react-router-dom";
-import UserCard from "../components/UserCard";
+// Home.jsx
+import { Outlet, useOutletContext } from "react-router-dom"
+import UserCard from "../components/UserCard"
 
 function Home(){
-    const users = useOutletContext();
-    const userList = users.map(user => <UserCard key={user.id} user={user}/>);
+    const users = useOutletContext()
+    const userList = users.map(user => <UserCard key={user.id} user={user}/>)
 
-  return (
-      <main>
-        <h1>Home!</h1>
-        <Outlet context={users}/>
-        {userList}
-      </main>
-  );
-};
+    return (
+        <main>
+            <h1>Home!</h1>
+            <Outlet context={users}/>
+            {userList}
+        </main>
+    )
+}
 
-export default Home;
+export default Home
 ```
 
 Now we can successfully access that data within our `UserProfile` component.
 
 ```jsx
-// UserProfile.js
+// UserProfile.jsx
 import { useParams, useOutletContext } from "react-router-dom";
 
 function UserProfile() {
-  const params = useParams();
-  const users = useOutletContext();
+  const params = useParams()
+  const users = useOutletContext()
 
-  const user = users.find(user => user.id === parseInt(params.id));
-
-  if (!user){
-    return <h1>Loading...</h1>
-  }
+  const user = users.find(user => user.id === parseInt(params.id))
 
   return(
-      <aside>
-        <h1>{user.name}</h1>
-      </aside>
-  );
-};
+        <aside>
+            { user.name ? <h1>{user.name}</h1> : <h1>Loading...</h1> }
+        </aside>
+    )
+}
 
-export default UserProfile;
+export default UserProfile
 ```
 
 We could have still used a `useEffect` and a `fetch` to load specific user data
