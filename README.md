@@ -20,6 +20,9 @@ specific user. Instead, we want that user to display on the same page as the
 list of users! But we do still want each user to have their own URL so that we
 can share links to specific users if we want to.
 
+Finally, we want to set up our user state in a way that allows us to easily pass 
+data from route to route.
+
 All of this can be done using **Nested Routing**. Nested Routing allows us to
 re-render specific _pieces_ of a webpage when a user navigates to a new route,
 rather than re-rendering the entire page. This can be great for developers, as
@@ -42,6 +45,12 @@ While this parallel approach definitely works, and might be the right decision
 depending on the app you're building, it has some drawbacks. As mentioned above,
 we had some code that wasn't very DRY — we used the `NavBar` component in every
 one of our page views.
+
+Moreover, the only way we could have declared global state for our application 
+would have been through creating our own contextProvider with the useContext hook. 
+While this is, once again, a perfectly reasonable approach, it can be nice to have 
+a parent component that can instantiate and pass down global application state when 
+your app first loads.
 
 >**Note**: We could have also used a more advanced feature of `react-router`
 >called `loaders`, which allow you to request data for a page as it loads. This
