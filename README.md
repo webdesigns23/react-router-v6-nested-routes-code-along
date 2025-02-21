@@ -233,10 +233,13 @@ function Home(){
 
     useEffect(() =>{
         fetch("http://localhost:4000/users")
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) { throw new Error("failed to fetch users") }
+            return r.json()
+        })
         .then(data => setUsers(data))
         .catch(error => console.error(error))
-    }, []);
+    }, [])
 
     const userList = users.map(user =>{
         return <UserCard key={user.id} user={user}/>
@@ -308,7 +311,10 @@ function Layout(){
 
     useEffect(() =>{
         fetch("http://localhost:4000/users")
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) { throw new Error("failed to fetch users") }
+            return r.json()
+        })
         .then(data => setUsers(data))
         .catch(error => console.error(error))
     }, [])
