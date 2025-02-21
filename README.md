@@ -78,9 +78,34 @@ browser.
 objects; so far, we've covered `path` and `element`. Another
 option, `children`, is how we can tell a route that it has _nested routes_.
 
-Go ahead and update our routes in `App.jsx` to include the following code. This
-will render each of our page-level components as a nested route of our `/` path
-and our `App` component:
+W'll start by setting up the `Layout` component. This component is already created 
+in the pages/ folder, so all we need to do is include our `NavBar` component directly 
+within our `Layout`, rather than dropping it into every page-level component:
+
+```jsx
+// Layout.jsx
+import NavBar from "./components/NavBar"
+
+function Layout(){
+    return(
+        <>
+            <header>
+                <NavBar />
+            </header>
+        </>
+    )
+}
+```
+
+Much easier! And, if we create a new page for our website, we don't have to
+remember to include the `NavBar` component within that new page.
+
+Remember to remove the `header` containing the `NavBar` from the `About`, 
+`Login`, `ErrorPage`, and `Home` components after adding this code to `Layout`.
+
+Next, go ahead and update our routes in `App.jsx` to include the following code. 
+This will render each of our page-level components as a nested route of our `/` 
+path and our `Layout` component:
 
 ```jsx
 // App.jsx
@@ -124,33 +149,6 @@ Note that it's okay for our `Home` component to have the same path as our parent
 `Layout` component. All child route paths must _start with_ their parent's route
 path, and one of them (but only one) can _exactly match_ its parent's route
 path.
-
-There's one more simplification we can make, this time to the `Layout.jsx` file.
-Since `Layout` now renders no matter what URL we visit, we can just include our
-`NavBar` component directly within our `Layout`, rather than dropping it into every
-page-level component:
-
-```jsx
-// Layout.jsx
-import NavBar from "./components/NavBar"
-
-function Layout(){
-    return(
-        <>
-            <header>
-                <NavBar />
-            </header>
-        </>
-    )
-}
-```
-
-Much easier! And, if we create a new page for our website, we don't have to
-remember to include the `NavBar` component within that new page.
-
-Remember to remove the `header` containing the `NavBar` from the `Home`
-component after adding this code to `App`. We have already removed it from the
-other pages for you.
 
 ## Using `react-router-dom`'s Outlet Component
 
