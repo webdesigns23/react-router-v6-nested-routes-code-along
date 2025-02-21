@@ -8,7 +8,10 @@ function UserProfile() {
 
   useEffect(() =>{
     fetch(`http://localhost:4000/users/${userId}`)
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) { throw new Error("Failed to get user information") }
+      return r.json()
+    })
     .then(data => setUser(data))
     .catch(error => console.error(error))
   }, [userId])
